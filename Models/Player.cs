@@ -3,13 +3,19 @@ namespace DungeonGame.Models
 {
   public class Player
   {
-    List<Item> Inventory = new List<Item>();
+    public List<Item> Inventory { get; set; } = new List<Item>();
     public string PlayerName { get; set; }
-    public string PlayerPosition { get; set; }
-    public Player(string name)
+    public Room PlayerPosition { get; set; }
+    public int PlayerLife { get; set; }
+    public Player(string name, int life)
     {
       PlayerName = name;
-      PlayerPosition = "1_1";
+      PlayerLife = life;
+    }
+    public void GrabItem()
+    {
+      Inventory.Add(PlayerPosition.Item);
+      PlayerPosition.Item = null;
     }
   }
 }

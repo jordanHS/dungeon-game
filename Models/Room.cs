@@ -5,11 +5,13 @@ namespace DungeonGame.Models
   {
     public Item Item { get; set; }
     public string Coordinates { get; set; }
+    public int PositionId { get; set; }
     public List<Room> Doors { get; set; } = new List<Room>();
-    public Room(Item itemconstructor, string position)
+    public Room(Item itemconstructor, string position, int posId)
     {
       Item = itemconstructor;
       Coordinates = position;
+      PositionId = posId;
     }
   }
 }
