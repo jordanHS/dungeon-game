@@ -8,22 +8,21 @@ namespace DungeonGame
   {
     public static void Main()
     {
-      bool GameActive = true;
       Room[] GameBoard = new Room[16];
       InitializeGame(GameBoard);
       Console.WriteLine("Welcome to the Dungeon Game!");
       Console.WriteLine("Enter your name:");
       string name = Console.ReadLine();
       Console.WriteLine("Choose a difficulty:");
-      Console.WriteLine("1: Easy (20 Lives)");
-      Console.WriteLine("2: Medium (15 Lives)");
-      Console.WriteLine("3: Hard (10 Lives)");
+      Console.WriteLine("1: Easy (25 Health)");
+      Console.WriteLine("2: Medium (15 Health)");
+      Console.WriteLine("3: Hard (10 Health)");
       int difficulty = int.Parse(Console.ReadLine());
       Player player = CreatePlayer(name, difficulty);
       player.PlayerPosition = GameBoard[0];
       DrawBoard(player);
       int input;
-      while(GameActive)
+      while(player.GameActive)
       {
         Console.WriteLine("You have {0} health remaining. Each move uses 1 health.", player.PlayerLife);
         Console.WriteLine("What would you like to do?");
@@ -36,9 +35,11 @@ namespace DungeonGame
           case 1:
             DrawBoard(player);
             Move(player, GameBoard);
-            DrawBoard(player);
+            if(player.GameActive == true)
+              DrawBoard(player);
             break;
           case 2:
+            UseItem(player);
             break;
           case 3:
             DrawBoard(player);
@@ -46,6 +47,17 @@ namespace DungeonGame
           default:
             Console.WriteLine("Invalid input.");
             break;
+        }
+        if(player.GameActive == true && player.PlayerLife == 0)
+        {
+          player.GameActive = false;
+          Console.WriteLine("####################################################");
+          Console.WriteLine("\\    /  ------   |     |      ----\\   |  ------  ----\\ ");
+          Console.WriteLine(" \\  /   |     |  |     |      |    |  |  |       |    | ");
+          Console.WriteLine("  \\/    |     |  |     |      |    |  |  +----   |    | ");
+          Console.WriteLine("   |    |     |  |     |      |    |  |  |       |    | ");
+          Console.WriteLine("   |    ------   -------      -----/  |  ------  -----/ ");
+          Console.WriteLine("####################################################");
         }
       }
     }
@@ -127,6 +139,20 @@ namespace DungeonGame
               player.PlayerLife--;
             }
           }
+          else
+          {
+            if(player.DoorUnlocked == true)
+            {
+              player.GameActive = false;
+              Console.WriteLine("####################################################");
+              Console.WriteLine("####################################################");
+              Console.WriteLine("####################################################");
+              Console.WriteLine("################# Congratulations ##################");
+              Console.WriteLine("################ You Escaped Alive #################");
+              Console.WriteLine("####################################################");
+              Console.WriteLine("####################################################");
+            }
+          }
           break;
         default:
           Console.WriteLine("Invalid input.");
@@ -134,9 +160,67 @@ namespace DungeonGame
       }
 
     }
-    public static void UseItem()
+    public static void UseItem(Player player)
     {
-
+      if(player.Inventory.Count == 0)
+      {
+        Console.WriteLine("You don't have any items!!");
+      }
+      else
+      {
+        Console.WriteLine("Which item would you like to use?");
+        for(int i = 0; i < player.Inventory.Count; i++)
+        {
+          Console.WriteLine("{0}: {1}", i+1, player.Inventory[i].ItemName);
+        }
+        int input = int.Parse(Console.ReadLine());
+        if(input >= 1 && input < player.Inventory.Count + 1)
+        {
+          Item choice = player.Inventory[input-1];
+          switch(choice.ItemName)
+          {
+            case "fork":
+              Console.WriteLine("**** You stab a wall with the fork, nothing happens ****");
+              break;
+            case "bowl of food":
+              bool foodEaten = false;
+              int foodIndex = 0;
+              foreach(Item i in player.Inventory)
+              {
+                if(i.ItemName == "fork")
+                {
+                  Console.WriteLine("**** You eat the food and gain 5 health ****");
+                  player.PlayerLife += 5;
+                  foodEaten = true;
+                  foodIndex = player.Inventory.FindIndex(x => x.ItemName == "bowl of food");
+                }
+              }
+              if(foodEaten)
+              {
+                player.Inventory.RemoveAt(foodIndex);
+              }
+              break;
+            case "key":
+              if(player.PlayerPosition.PositionId == 15)
+              {
+                Console.WriteLine("**** You unlock the door ****");
+                player.DoorUnlocked = true;
+              }
+              else
+              {
+                Console.WriteLine("**** You attempt to unlock the air, nothing happens ****");
+              }
+              break;
+            case "shiny coin":
+              Console.WriteLine("**** You flip the coin, it lands heads. It always lands heads... ****");
+              break;
+          }
+        }
+        else
+        {
+          Console.WriteLine("Invalid selection.");
+        }
+      }
     }
     public static void DrawBoard(Player player)
     {
@@ -169,22 +253,22 @@ namespace DungeonGame
     }
     public static Player CreatePlayer(string name, int difficulty)
     {
-      int lives = 20;
+      int health = 0;
       switch(difficulty)
       {
         case 1:
-          lives = 20;
+          health = 25;
           break;
         case 2:
-          lives = 15;
+          health = 20;
           break;
         case 3:
-          lives = 10;
+          health = 15;
           break;
         default:
           break;
       }
-      Player p1 = new Player(name, lives);
+      Player p1 = new Player(name, health);
       return p1;
     }
     public static void InitializeGame(Room[] board)

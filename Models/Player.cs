@@ -7,6 +7,8 @@ namespace DungeonGame.Models
     public string PlayerName { get; set; }
     public Room PlayerPosition { get; set; }
     public int PlayerLife { get; set; }
+    public bool DoorUnlocked { get; set; } = false;
+    public bool GameActive { get; set; } = true;
     public Player(string name, int life)
     {
       PlayerName = name;
